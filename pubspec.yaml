@@ -44,6 +44,7 @@ dependencies:
   google_fonts: ^4.0.4
   url_launcher: ^6.1.11
 
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

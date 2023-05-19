@@ -3,6 +3,7 @@ import 'package:ecom_app/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+
 class Footer extends StatelessWidget {
   const Footer({Key? key}) : super(key: key);
 
