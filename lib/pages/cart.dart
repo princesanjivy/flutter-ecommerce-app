@@ -1,7 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecom_app/components/footer.dart';
 import 'package:ecom_app/components/my_button.dart';
 import 'package:ecom_app/components/my_spacer.dart';
 import 'package:ecom_app/constants.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class CartPage extends StatelessWidget {
@@ -29,44 +31,95 @@ class CartPage extends StatelessWidget {
           ),
         ],
       ),
-      body: Stack(
-        alignment: Alignment.bottomRight,
-        children: [
-          SingleChildScrollView(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    "Your cart items",
-                    style: TextStyle(
-                      fontSize: 28,
+      body: StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection("cart")
+              .where("user-id",
+                  isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+              .snapshots(),
+          builder: (context, d) {
+            if (!d.hasData) {
+              return CircularProgressIndicator(
+                color: primaryColor,
+              );
+            }
+            return Stack(
+              alignment:   (d.data!.size == 0)
+                  ? Alignment.topCenter: Alignment.bottomRight,
+              children: [
+                SingleChildScrollView(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          (d.data!.size == 0)
+                              ? "No items in cart!"
+                              : "Your cart items",
+                          style: TextStyle(
+                            fontSize: 28,
+                          ),
+                        ),
+                        VerticalSpacer(32),
+                        for (int i = 0; i < d.data!.size; i++)
+                          Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: StreamBuilder<DocumentSnapshot>(
+                                stream: FirebaseFirestore.instance
+                                    .collection("inventory")
+                                    .doc(d.data!.docs[i].get("inventory-id"))
+                                    .snapshots(),
+                                builder: (context, inventory) {
+                                  if (!inventory.hasData) {
+                                    return CircularProgressIndicator(
+                                      color: primaryColor,
+                                    );
+                                  }
+                                  Map item = inventory.data!.data() as Map;
+                                  return MyCard(
+                                    itemName: item["name"],
+                                    imageUrl: item["imageUrl"][0],
+                                    itemAmount: item["amount"],
+                                    onPressed: () async {
+                                      await FirebaseFirestore.instance
+                                          .collection("cart")
+                                          .doc(d.data!.docs[i].id)
+                                          .delete();
+                                    },
+                                  );
+                                }),
+                          ),
+                      ],
                     ),
                   ),
-                  VerticalSpacer(32),
-                  for (int i = 0; i < 10; i++)
-                    Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: MyCard(),
-                    ),
-                ],
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(50),
-            child: MyButton(text: "Checkout", onPressed: () {}),
-          ),
-        ],
-      ),
+                ),
+                (d.data!.size == 0)
+                    ? Container():  Padding(
+                  padding: const EdgeInsets.all(25),
+                  child: MyButton(text: "Checkout", onPressed: () {}),
+                ),
+              ],
+            );
+          }),
       bottomNavigationBar: Footer(),
     );
   }
 }
 
 class MyCard extends StatelessWidget {
-  const MyCard({Key? key}) : super(key: key);
+  const MyCard({
+    Key? key,
+    required this.imageUrl,
+    required this.itemName,
+    required this.itemAmount,
+    required this.onPressed,
+  }) : super(key: key);
+
+  final String imageUrl;
+  final String itemName;
+  final double itemAmount;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -94,26 +147,29 @@ class MyCard extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(15),
                 child: Image.network(
-                  "https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=394&q=80",
+                  imageUrl,
                   height: 50,
                   width: 50,
                   fit: BoxFit.cover,
                 ),
               ),
               Text(
-                "Watch",
+                itemName,
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
               ),
+              // Text(
+              //   "Qty: $qty",
+              // ),
               Text(
-                "Qty: 1",
-              ),
-              Text(
-                "\$ 200",
+                "\$ ${itemAmount}",
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               IconButton(
-                onPressed: () {},
-                icon: Icon(Icons.delete),
+                onPressed: onPressed,
+                icon: Icon(
+                  Icons.delete,
+                  color: primaryColor,
+                ),
               ),
             ],
           ),

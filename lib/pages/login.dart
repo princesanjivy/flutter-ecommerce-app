@@ -2,6 +2,9 @@ import 'package:ecom_app/components/footer.dart';
 import 'package:ecom_app/components/my_button.dart';
 import 'package:ecom_app/components/my_spacer.dart';
 import 'package:ecom_app/constants.dart';
+import 'package:ecom_app/helpers/change_screen.dart';
+import 'package:ecom_app/pages/home.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
@@ -14,6 +17,8 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+
+  bool showLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -63,9 +68,27 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             VerticalSpacer(8),
-            MyButton(
+            showLoading? CircularProgressIndicator(color: primaryColor,):  MyButton(
               text: "Submit",
-              onPressed: () {},
+              onPressed: () async {
+                showLoading = true;
+                setState(() {});
+
+                UserCredential user = await FirebaseAuth.instance
+                    .signInWithEmailAndPassword(
+                  email: emailController.text,
+                  password: passwordController.text,
+                );
+
+                showLoading = false;
+                setState(() {});
+
+                emailController.clear();
+                passwordController.clear();
+
+                Navigator.pop(context);
+                // changeScreenWithReplacement(context, HomePage());
+              },
             ),
           ],
         ),

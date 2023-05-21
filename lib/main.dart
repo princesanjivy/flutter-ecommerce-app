@@ -1,5 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ecom_app/constants.dart';
+import 'package:ecom_app/pages/admin.dart';
 import 'package:ecom_app/pages/cart.dart';
+import 'package:ecom_app/pages/home.dart';
 import 'package:ecom_app/pages/register.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -35,7 +40,37 @@ class _AppState extends State<App> {
       theme: ThemeData(
         textTheme: GoogleFonts.kanitTextTheme(),
       ),
-      home: RegisterPage(),
+      home: StreamBuilder<User?>(
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (context, user) {
+            if (user.hasData) {
+              return StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection("admin")
+                    .where("email", isEqualTo: user.data!.email)
+                    .snapshots(),
+                builder: (context, adminSnapshot) {
+                  if (adminSnapshot.hasData) {
+                    if (adminSnapshot.data!.size == 1) {
+                      // TODO
+                      return AdminPage();
+                    } else {
+                      return HomePage();
+                    }
+                  }
+                  return Scaffold(
+                    body: Center(
+                      child: CircularProgressIndicator(
+                        color: primaryColor,
+                      ),
+                    ),
+                  );
+                },
+              );
+            }
+          return RegisterPage();
+        }
+      ),
     );
   }
 }

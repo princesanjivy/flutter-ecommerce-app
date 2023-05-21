@@ -1,8 +1,22 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecom_app/components/my_button.dart';
 import 'package:flutter/material.dart';
 
 class MyItemCard extends StatelessWidget {
-  const MyItemCard({Key? key}) : super(key: key);
+  const MyItemCard({
+    Key? key,
+    required this.imageUrl,
+    required this.itemName,
+    required this.itemAmount,
+    required this.userId,
+    required this.itemId,
+  }) : super(key: key);
+
+  final String imageUrl;
+  final String itemName;
+  final double itemAmount;
+  final String userId;
+  final String itemId;
 
   @override
   Widget build(BuildContext context) {
@@ -20,27 +34,54 @@ class MyItemCard extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(15),
             child: Image.network(
-              "https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=394&q=80",
+              imageUrl,
               height: 100,
               width: double.maxFinite,
               fit: BoxFit.cover,
             ),
           ),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Watch"),
-                  Text("\$ 500"),
+                  Text(itemName),
+                  Text("\$ ${itemAmount}"),
                 ],
               ),
               Icon(Icons.favorite),
             ],
           ),
-          MyButton(
-            text: "Add to cart",
-            onPressed: () {},
-          ),
+          StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection("cart")
+                  .where("user-id", isEqualTo: userId)
+                  .where("inventory-id", isEqualTo: itemId)
+                  .snapshots(),
+              builder: (context, cartSS) {
+                if (!cartSS.hasData) {
+                  return CircularProgressIndicator();
+                }
+                return cartSS.data!.size == 1
+                    ? Text(
+                        "Added to cart",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    : MyButton(
+                        text: "Add to cart",
+                        onPressed: () async {
+                          await FirebaseFirestore.instance
+                              .collection("cart")
+                              .add({
+                            "user-id": userId,
+                            "inventory-id": itemId,
+                          });
+                        },
+                      );
+              }),
         ],
       ),
     );

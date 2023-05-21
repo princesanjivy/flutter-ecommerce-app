@@ -5,6 +5,7 @@ import 'package:ecom_app/constants.dart';
 import 'package:ecom_app/helpers/change_screen.dart';
 import 'package:ecom_app/pages/home.dart';
 import 'package:ecom_app/pages/login.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -18,6 +19,8 @@ class _RegisterPageState extends State<RegisterPage> {
   TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+
+  bool showLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -80,11 +83,31 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             ),
             VerticalSpacer(8),
-            MyButton(
+            showLoading?CircularProgressIndicator(
+              color: primaryColor,
+            ):MyButton(
               text: "Submit",
-              onPressed: () {
-                // TODO
-                changeScreenWithReplacement(context, HomePage());
+              onPressed: () async {
+                showLoading = true;
+                setState(() {});
+
+                UserCredential userObj =
+                    await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                  email: emailController.text,
+                  password: passwordController.text,
+                );
+
+                userObj.user!.updateDisplayName(nameController.text!);
+
+                showLoading = false;
+                setState(() {});
+
+                emailController.clear();
+                passwordController.clear();
+                nameController.clear();
+
+                // Navigator.pop(context);
+                // changeScreenWithReplacement(context, HomePage());
               },
             ),
             InkWell(
