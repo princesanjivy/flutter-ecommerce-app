@@ -69,14 +69,17 @@ class HomePage extends StatelessWidget {
                 Map item = d.data!.docs[index].data() as Map;
                 return InkWell(
                   onTap: () {
-                    changeScreen(context, ItemDetailsPage(
-                      itemName: item["name"],
-                      itemAmount: item["amount"],
-                      description: item["description"],
-                      images: item["imageUrl"],
-                      mainImageUrl: item["imageUrl"][0],
-
-                    ));
+                    changeScreen(
+                        context,
+                        ItemDetailsPage(
+                          itemName: item["name"],
+                          itemAmount: item["amount"],
+                          description: item["description"],
+                          images: item["imageUrl"],
+                          mainImageUrl: item["imageUrl"][0],
+                          userId: userId,
+                          itemId: itemId,
+                        ));
                   },
                   child: MyItemCard(
                     imageUrl: item["imageUrl"][0],

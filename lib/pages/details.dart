@@ -1,9 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecom_app/components/footer.dart';
 import 'package:ecom_app/components/my_button.dart';
 import 'package:ecom_app/components/my_spacer.dart';
 import 'package:ecom_app/constants.dart';
 import 'package:ecom_app/helpers/change_screen.dart';
+import 'package:ecom_app/models/item.dart';
 import 'package:ecom_app/pages/cart.dart';
+import 'package:ecom_app/pages/checkout.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class ItemDetailsPage extends StatefulWidget {
@@ -14,12 +18,16 @@ class ItemDetailsPage extends StatefulWidget {
     required this.description,
     required this.itemAmount,
     required this.itemName,
+    required this.userId,
+    required this.itemId,
   }) : super(key: key);
   final String mainImageUrl;
   final List images;
   final String description;
   final double itemAmount;
   final String itemName;
+  final String userId;
+  final String itemId;
 
   @override
   State<ItemDetailsPage> createState() => _ItemDetailsPageState();
@@ -27,6 +35,8 @@ class ItemDetailsPage extends StatefulWidget {
 
 class _ItemDetailsPageState extends State<ItemDetailsPage> {
   TextEditingController qtyController = TextEditingController();
+
+  bool showLoading = false;
 
   @override
   void initState() {
@@ -165,15 +175,87 @@ class _ItemDetailsPageState extends State<ItemDetailsPage> {
                     ],
                   ),
                   VerticalSpacer(12),
-                  MyButton(
-                    text: "Buy Now",
-                    onPressed: () {},
-                  ),
+                  showLoading
+                      ? CircularProgressIndicator(
+                          color: primaryColor,
+                        )
+                      : MyButton(
+                          text: "Buy Now",
+                          onPressed: () async {
+                            showLoading = true;
+                            setState(() {});
+                            // validate qty
+                            DocumentSnapshot item = await FirebaseFirestore
+                                .instance
+                                .collection("inventory")
+                                .doc(widget.itemId)
+                                .get();
+
+                            if(item.get("quantity") <= int.parse(qtyController.text) ) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text("You've reached max quantity"),
+                                ),
+                              );
+                              showLoading = false;
+                              setState(() {});
+                              return;
+                            }
+
+                            // move to checkout
+                            List<Item> items = [];
+
+                            items.add(
+                              Item(
+                                item.id,
+                                item.get("amount").toString(),
+                                item.get("name"),
+                                item.get("imageUrl")[0],
+                                int.parse(qtyController.text),
+                              ),
+                            );
+
+                            print(items);
+                            showLoading = false;
+                            setState(() {});
+                            changeScreen(
+                              context,
+                              CheckoutPage(
+                                items: items,
+                                page: 2,
+                              ),
+                            );
+                          }),
                   VerticalSpacer(8),
-                  MyButton(
-                    text: "Add to Cart",
-                    onPressed: () {},
-                  ),
+                  StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection("cart")
+                          .where("user-id", isEqualTo: widget.userId)
+                          .where("inventory-id", isEqualTo: widget.itemId)
+                          .snapshots(),
+                      builder: (context, cartSS) {
+                        if (!cartSS.hasData) {
+                          return CircularProgressIndicator();
+                        }
+                        return cartSS.data!.size == 1
+                            ? Text(
+                                "Added to cart",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              )
+                            : MyButton(
+                                text: "Add to cart",
+                                onPressed: () async {
+                                  await FirebaseFirestore.instance
+                                      .collection("cart")
+                                      .add({
+                                    "user-id": widget.userId,
+                                    "inventory-id": widget.itemId,
+                                  });
+                                },
+                              );
+                      }),
                 ],
               )
             ],

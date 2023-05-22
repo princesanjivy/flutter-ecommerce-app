@@ -39,6 +39,12 @@ class _AppState extends State<App> {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         textTheme: GoogleFonts.kanitTextTheme(),
+        canvasColor: Colors.white,
+        colorScheme: Theme.of(context).colorScheme.copyWith(
+          primary: primaryColor,
+          // background: Colors.red,
+          secondary: primaryColor,
+        ),
       ),
       home: StreamBuilder<User?>(
           stream: FirebaseAuth.instance.authStateChanges(),

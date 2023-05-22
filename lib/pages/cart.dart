@@ -3,11 +3,21 @@ import 'package:ecom_app/components/footer.dart';
 import 'package:ecom_app/components/my_button.dart';
 import 'package:ecom_app/components/my_spacer.dart';
 import 'package:ecom_app/constants.dart';
+import 'package:ecom_app/helpers/change_screen.dart';
+import 'package:ecom_app/models/item.dart';
+import 'package:ecom_app/pages/checkout.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class CartPage extends StatelessWidget {
+class CartPage extends StatefulWidget {
   const CartPage({Key? key}) : super(key: key);
+
+  @override
+  State<CartPage> createState() => _CartPageState();
+}
+
+class _CartPageState extends State<CartPage> {
+  bool showLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -44,8 +54,9 @@ class CartPage extends StatelessWidget {
               );
             }
             return Stack(
-              alignment:   (d.data!.size == 0)
-                  ? Alignment.topCenter: Alignment.bottomRight,
+              alignment: (d.data!.size == 0)
+                  ? Alignment.topCenter
+                  : Alignment.bottomRight,
               children: [
                 SingleChildScrollView(
                   child: Center(
@@ -95,10 +106,59 @@ class CartPage extends StatelessWidget {
                   ),
                 ),
                 (d.data!.size == 0)
-                    ? Container():  Padding(
-                  padding: const EdgeInsets.all(25),
-                  child: MyButton(text: "Checkout", onPressed: () {}),
-                ),
+                    ? Container()
+                    : showLoading
+                        ? CircularProgressIndicator(
+                            color: primaryColor,
+                          )
+                        : Padding(
+                            padding: const EdgeInsets.all(25),
+                            child: MyButton(
+                                text: "Checkout",
+                                onPressed: () async {
+                                  showLoading = true;
+                                  setState(() {});
+                                  List<Item> items = [];
+
+                                  QuerySnapshot cart = await FirebaseFirestore
+                                      .instance
+                                      .collection("cart")
+                                      .where("user-id",
+                                          isEqualTo: FirebaseAuth
+                                              .instance.currentUser!.uid)
+                                      .get();
+
+                                  for (int i = 0; i < cart.size; i++) {
+                                    DocumentSnapshot inventory =
+                                        await FirebaseFirestore.instance
+                                            .collection("inventory")
+                                            .doc(cart.docs[i]
+                                                .get("inventory-id"))
+                                            .get();
+
+                                    items.add(
+                                      Item(
+                                        inventory.id,
+                                        inventory.get("amount").toString(),
+                                        inventory.get("name"),
+                                        inventory.get("imageUrl")[0],
+                                        1,
+                                      ),
+                                    );
+                                  }
+
+                                  print(items);
+                                  showLoading = false;
+                                  setState(() {});
+                                  changeScreen(
+                                    context,
+                                    CheckoutPage(
+                                      items: items,
+                                      page: 2,
+                                    ),
+                                  );
+                                }),
+                          ),
               ],
             );
           }),
