@@ -34,7 +34,3 @@ Feel free to modify and enhance the app to suit your specific needs or use it as
 ## Motive
 
 This project was developed as part of a 7 week-long teaching initiative for school grads in US.
-
-<br>
-
-You can customize the description further based on your preferences and add any additional information that might be relevant to your project.
