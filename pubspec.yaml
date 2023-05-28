@@ -43,6 +43,7 @@ dependencies:
   dart_mailgun: ^1.0.3
   google_fonts: ^4.0.4
   url_launcher: ^6.1.11
+  markdown_widget: ^2.2.0
 
 
 dev_dependencies:

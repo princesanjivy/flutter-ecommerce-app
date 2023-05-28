@@ -237,21 +237,22 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         ),
                       );
                       Map itemQuant = {};
-                      widget.items.forEach((item) async {
+                      for(int index=0; index<widget.items.length; index++){
                         DocumentSnapshot i = await FirebaseFirestore.instance
                             .collection("inventory")
-                            .doc(item.itemId)
+                            .doc(widget.items[index].itemId)
                             .get();
 
                         await FirebaseFirestore.instance
                             .collection("inventory")
-                            .doc(item.itemId)
+                            .doc(widget.items[index].itemId)
                             .update({
-                          "quantity": i.get("quantity") - item.quantity
+                          "quantity": i.get("quantity") - widget.items[index].quantity
                         });
 
-                        itemQuant[item.itemId] = item.quantity;
-                      });
+                        itemQuant[widget.items[index].itemId] = widget.items[index].quantity;
+                      }
+
                       DocumentReference orders = await FirebaseFirestore
                           .instance
                           .collection("orders")

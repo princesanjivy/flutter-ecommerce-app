@@ -68,28 +68,38 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             VerticalSpacer(8),
-            showLoading? CircularProgressIndicator(color: primaryColor,):  MyButton(
-              text: "Submit",
-              onPressed: () async {
-                showLoading = true;
-                setState(() {});
+            showLoading
+                ? CircularProgressIndicator(
+                    color: primaryColor,
+                  )
+                : MyButton(
+                    text: "Submit",
+                    onPressed: () async {
+                      bool changePage = false;
+                      showLoading = true;
+                      setState(() {});
+                      try {
+                        UserCredential user = await FirebaseAuth.instance
+                            .signInWithEmailAndPassword(
+                          email: emailController.text,
+                          password: passwordController.text,
+                        );
+                        changePage = true;
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text("Error occured while Logging In")));
+                      } finally {
+                        showLoading = false;
+                        setState(() {});
 
-                UserCredential user = await FirebaseAuth.instance
-                    .signInWithEmailAndPassword(
-                  email: emailController.text,
-                  password: passwordController.text,
-                );
+                        emailController.clear();
+                        passwordController.clear();
+                      }
+                      if (changePage) Navigator.pop(context);
 
-                showLoading = false;
-                setState(() {});
-
-                emailController.clear();
-                passwordController.clear();
-
-                Navigator.pop(context);
-                // changeScreenWithReplacement(context, HomePage());
-              },
-            ),
+                      // changeScreenWithReplacement(context, HomePage());
+                    },
+                  ),
           ],
         ),
       ),

@@ -1,5 +1,8 @@
 import 'package:ecom_app/components/my_spacer.dart';
 import 'package:ecom_app/constants.dart';
+import 'package:ecom_app/helpers/change_screen.dart';
+import 'package:ecom_app/pages/about.dart';
+import 'package:ecom_app/pages/contact.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -44,16 +47,26 @@ class Footer extends StatelessWidget {
                     ),
                   ),
                   VerticalSpacer(16),
-                  Text(
-                    "About",
-                    style: TextStyle(
-                      color: Colors.white,
+                  InkWell(
+                    onTap: (){
+                      changeScreen(context, AboutPage());
+                    },
+                    child: Text(
+                      "About",
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
                     ),
                   ),
-                  Text(
-                    "Contact",
-                    style: TextStyle(
-                      color: Colors.white,
+                  InkWell(
+                    onTap: (){
+                      changeScreen(context, ContactPage());
+                    },
+                    child: Text(
+                      "Contact",
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ],

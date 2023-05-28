@@ -54,25 +54,7 @@ class _ItemDetailsPageState extends State<ItemDetailsPage> {
         title: Text(appName),
         backgroundColor: primaryColor,
         elevation: 0,
-        actions: [
-          Icon(
-            Icons.favorite,
-            color: Colors.white,
-          ),
-          IconButton(
-            onPressed: () {
-              changeScreen(context, CartPage());
-            },
-            icon: Icon(
-              Icons.shopping_cart,
-              color: Colors.white,
-            ),
-          ),
-          Icon(
-            Icons.person,
-            color: Colors.white,
-          ),
-        ],
+
       ),
       body: Padding(
         padding: const EdgeInsets.all(24),
@@ -130,11 +112,11 @@ class _ItemDetailsPageState extends State<ItemDetailsPage> {
                           fontSize: 34,
                         ),
                       ),
-                      HorizontalSpacer(150),
-                      Icon(
-                        Icons.favorite_border,
-                        size: 32,
-                      ),
+                      // HorizontalSpacer(150),
+                      // Icon(
+                      //   Icons.favorite_border,
+                      //   size: 32,
+                      // ),
                     ],
                   ),
                   VerticalSpacer(12),

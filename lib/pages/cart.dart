@@ -6,6 +6,7 @@ import 'package:ecom_app/constants.dart';
 import 'package:ecom_app/helpers/change_screen.dart';
 import 'package:ecom_app/models/item.dart';
 import 'package:ecom_app/pages/checkout.dart';
+import 'package:ecom_app/pages/wishlist.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -23,23 +24,10 @@ class _CartPageState extends State<CartPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(appName),
+        title: Text("Cart"),
         backgroundColor: primaryColor,
         elevation: 0,
-        actions: [
-          Icon(
-            Icons.favorite,
-            color: Colors.white,
-          ),
-          Icon(
-            Icons.shopping_cart,
-            color: Colors.orange,
-          ),
-          Icon(
-            Icons.person,
-            color: Colors.white,
-          ),
-        ],
+
       ),
       body: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
