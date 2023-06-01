@@ -33,4 +33,4 @@ Feel free to modify and enhance the app to suit your specific needs or use it as
 
 ## Motive
 
-This project was developed as part of a 7 week-long teaching initiative for school graduate in US.
+This project was developed as part of a 7 week-long teaching initiative for school graduates in US.
